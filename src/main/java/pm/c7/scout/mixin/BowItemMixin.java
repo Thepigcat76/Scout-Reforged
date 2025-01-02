@@ -1,11 +1,15 @@
 package pm.c7.scout.mixin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.world.World;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,33 +17,38 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pm.c7.scout.ScoutUtil;
 import pm.c7.scout.config.ScoutConfig;
-import pm.c7.scout.item.BaseBagItem;
+import pm.c7.scout.content.items.BaseBagItem;
+
+import java.util.List;
 
 @Mixin(BowItem.class)
 public class BowItemMixin {
-	@Inject(method = "onStoppedUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V"), locals = LocalCapture.CAPTURE_FAILHARD)
-	public void scout$arrowsFromBags(ItemStack stack, World world, LivingEntity user, int remainingUseTicks, CallbackInfo ci, PlayerEntity playerEntity, boolean bl, ItemStack itemStack, int maxTime, float f) {
-		if (ScoutConfig.useArrows) {
-			boolean infinity = bl && itemStack.isOf(Items.ARROW);
+	@Inject(method = "releaseUsing", at = @At(
+		value = "INVOKE",
+		target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
+	))
+	public void scout$arrowsFromBags(ItemStack itemStack, Level level, LivingEntity user, int remainingUseTicks, CallbackInfo ci) {
+		if (ScoutConfig.useArrows && user instanceof Player player) {
+			boolean bl = true;
+			boolean infinity = bl && itemStack.is(Items.ARROW);
 			boolean hasRan = false;
 
-			if (!infinity && !playerEntity.getAbilities().creativeMode) {
-				var leftPouch = ScoutUtil.findBagItem(playerEntity, BaseBagItem.BagType.POUCH, false);
-				var rightPouch = ScoutUtil.findBagItem(playerEntity, BaseBagItem.BagType.POUCH, true);
-				var satchel = ScoutUtil.findBagItem(playerEntity, BaseBagItem.BagType.SATCHEL, false);
+			if (!infinity && !player.hasInfiniteMaterials()) {
+				var leftPouch = ScoutUtil.findBagItem(player, BaseBagItem.BagType.POUCH, false);
+				var rightPouch = ScoutUtil.findBagItem(player, BaseBagItem.BagType.POUCH, true);
+				var satchel = ScoutUtil.findBagItem(player, BaseBagItem.BagType.SATCHEL, false);
 
 				if (!leftPouch.isEmpty()) {
 					BaseBagItem item = (BaseBagItem) leftPouch.getItem();
-					var inv = item.getInventory(leftPouch);
+					IItemHandlerModifiable itemHandler = item.getItemHandler(leftPouch);
 
-					for(int i = 0; i < inv.size(); ++i) {
-						ItemStack invStack = inv.getStack(i);
-						if (ItemStack.areEqual(invStack, itemStack)) {
-							invStack.decrement(1);
+					for(int i = 0; i < itemHandler.getSlots(); ++i) {
+						ItemStack invStack = itemHandler.getStackInSlot(i);
+						if (ItemStack.isSameItemSameComponents(invStack, itemStack)) {
+							invStack.shrink(1);
 							if (invStack.isEmpty()) {
-								inv.setStack(i, ItemStack.EMPTY);
+								itemHandler.setStackInSlot(i, ItemStack.EMPTY);
 							}
-							inv.markDirty();
 							hasRan = true;
 							break;
 						}
@@ -47,16 +56,16 @@ public class BowItemMixin {
 				}
 				if (!rightPouch.isEmpty() && !hasRan) {
 					BaseBagItem item = (BaseBagItem) rightPouch.getItem();
-					var inv = item.getInventory(rightPouch);
+					var inv = item.getItemHandler(rightPouch);
 
-					for(int i = 0; i < inv.size(); ++i) {
-						ItemStack invStack = inv.getStack(i);
-						if (ItemStack.areEqual(invStack, itemStack)) {
-							invStack.decrement(1);
+					for(int i = 0; i < inv.getSlots(); ++i) {
+						ItemStack invStack = inv.getStackInSlot(i);
+						if (ItemStack.isSameItem(invStack, itemStack)) {
+							invStack.shrink(1);
 							if (invStack.isEmpty()) {
-								inv.setStack(i, ItemStack.EMPTY);
+								inv.setStackInSlot(i, ItemStack.EMPTY);
 							}
-							inv.markDirty();
+							//inv.markDirty();
 							hasRan = true;
 							break;
 						}
@@ -64,16 +73,16 @@ public class BowItemMixin {
 				}
 				if (!satchel.isEmpty() && !hasRan) {
 					BaseBagItem item = (BaseBagItem) satchel.getItem();
-					var inv = item.getInventory(satchel);
+					var inv = item.getItemHandler(satchel);
 
-					for(int i = 0; i < inv.size(); ++i) {
-						ItemStack invStack = inv.getStack(i);
-						if (ItemStack.areEqual(invStack, itemStack)) {
-							invStack.decrement(1);
+					for(int i = 0; i < inv.getSlots(); ++i) {
+						ItemStack invStack = inv.getStackInSlot(i);
+						if (ItemStack.isSameItem(invStack, itemStack)) {
+							invStack.shrink(1);
 							if (invStack.isEmpty()) {
-								inv.setStack(i, ItemStack.EMPTY);
+								inv.setStackInSlot(i, ItemStack.EMPTY);
 							}
-							inv.markDirty();
+							//inv.markDirty();
 							hasRan = true;
 							break;
 						}

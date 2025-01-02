@@ -1,100 +1,137 @@
 plugins {
-	alias libs.plugins.quilt.loom
+	id 'java-library'
+	id 'eclipse'
+	id 'idea'
+	id 'maven-publish'
+	id 'net.neoforged.gradle.userdev' version '7.0.173'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+	distributionType = Wrapper.DistributionType.BIN
+}
+
+version = mod_version
+group = mod_group_id
+
+repositories {
+	mavenLocal()
+	maven {
+		url "https://cursemaven.com"
+	}
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+	}
+	maven {
+		// location of the maven that hosts JEI files since January 2023
+		name = "Jared's maven"
+		url = "https://maven.blamejared.com/"
+	}
+	maven {
+		name = "OctoStudios"
+		url = uri("https://maven.octo-studios.com/releases")
+	}
 }
 
 base {
-	archivesName = project.archives_base_name
+	archivesName = mod_id
 }
 
-version = "$project.version+${libs.versions.minecraft.get()}"
-group = project.maven_group
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-repositories {
-	maven {
-		name = "Fabric"
-		url = "https://maven.fabricmc.net/"
+runs {
+	configureEach {
+		systemProperty 'forge.logging.markers', 'REGISTRIES'
+
+		systemProperty 'forge.logging.console.level', 'debug'
+
+		modSource project.sourceSets.main
 	}
-	maven {
-		name = "TerraformersMC"
-		url = "https://maven.terraformersmc.com/"
+
+	client {
+		systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
 	}
-	maven {
-		name = "Ladysnake Libs"
-		url = "https://maven.ladysnake.org/releases"
+
+	server {
+		systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+		argument '--nogui'
 	}
-	maven {
-		name = "Sleeping Town"
-		url = "https://repo.sleeping.town"
-		content {
-			includeGroup "com.unascribed"
-		}
+
+	gameTestServer {
+		systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+	}
+
+	data {
+		arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
 	}
 }
 
-loom {
-	// Loom and Loader both use this block in order to gather more information about your mod.
-	mods {
-		// This should match your mod id.
-		"scout" {
-			// Tell Loom about each source set used by your mod here. This ensures that your mod's classes are properly transformed by Loader.
-			sourceSet("main")
-			// If you shade (directly include classes, not JiJ) a dependency into your mod, include it here using one of these methods:
-			// dependency("com.example.shadowedmod:1.2.3")
-			// configuration("exampleShadedConfigurationName")
-		}
-	}
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+	runtimeClasspath.extendsFrom localRuntime
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${libs.versions.minecraft.get()}"
-	mappings "net.fabricmc:yarn:${libs.versions.minecraft.get()}+${libs.versions.yarn.get()}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${libs.versions.fabric.loader.get()}"
+	implementation "net.neoforged:neoforge:${neo_version}"
 
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${libs.versions.fabric.api.get()}+${libs.versions.minecraft.get()}"
+	implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}+1.21"
 
-	// not JiJ because it causes its mixins to fail to load
-	modApi "dev.emi:trinkets:${libs.versions.trinkets.get()}"
-	modApi include("com.unascribed:lib39-core:${libs.versions.lib39.get()}+${libs.versions.minecraft.get()}")
-	modApi include("com.unascribed:lib39-dessicant:${libs.versions.lib39.get()}+${libs.versions.minecraft.get()}")
+	compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+	compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
 
-	modCompileOnly "dev.emi:emi-fabric:${libs.versions.emi.get()}+${libs.versions.minecraft.get()}:api"
-	modLocalRuntime "dev.emi:emi-fabric:${libs.versions.emi.get()}+${libs.versions.minecraft.get()}"
+	localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+	//runtimeOnly "curse.maven:embeddium-908741:5556146"
+	//runtimeOnly "curse.maven:sinytra-connector-890127:5637280"
+	//runtimeOnly "curse.maven:forgified-fabric-api-889079:5620473"
+	//runtimeOnly "maven.modrinth:component-viewer:Xh1OCy7O"
 }
 
-processResources {
-	inputs.property 'version', version
-	inputs.property 'minecraft_version', libs.versions.minecraft.get()
-	inputs.property 'fabric_version', libs.versions.fabric.api.get()
-	inputs.property 'trinkets_version', libs.versions.trinkets.get()
-	inputs.property 'lib39_version', libs.versions.lib39.get()
-	inputs.property 'emi_version', libs.versions.emi.get()
+tasks.withType(ProcessResources).configureEach {
+	var replaceProperties = [
+		minecraft_version      : minecraft_version,
+		minecraft_version_range: minecraft_version_range,
+		neo_version            : neo_version,
+		neo_version_range      : neo_version_range,
+		loader_version_range   : loader_version_range,
+		mod_id                 : mod_id,
+		mod_name               : mod_name,
+		mod_license            : mod_license,
+		mod_version            : mod_version,
+		mod_authors            : mod_authors,
+		mod_description        : mod_description
+	]
+	inputs.properties replaceProperties
 
-	filesMatching('fabric.mod.json') {
-		expand (
-			"version": version,
-			"minecraft_version": libs.versions.minecraft.get(),
-			"fabric_version": libs.versions.fabric.api.get(),
-			"trinkets_version": libs.versions.trinkets.get(),
-			"lib39_version": libs.versions.lib39.get(),
-			"emi_version": libs.versions.emi.get()
-		)
+	filesMatching(['META-INF/neoforge.mods.toml']) {
+		expand replaceProperties
+	}
+
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+}
+
+publishing {
+	publications {
+		register('mavenJava', MavenPublication) {
+			from components.java
+		}
+	}
+	repositories {
+		maven {
+			url "file://${project.projectDir}/repo"
+		}
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.encoding = 'UTF-8'
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
+	options.encoding = 'UTF-8'
 }
 
-java {
-	// Still required by IDEs such as Eclipse and Visual Studio Code
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
-}
-
-jar {
-	from('LICENSE') {
-		rename { "${it}_${base.archivesName.get()}" }
+idea {
+	module {
+		downloadSources = true
+		downloadJavadoc = true
 	}
 }

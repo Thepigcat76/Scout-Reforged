@@ -2,15 +2,12 @@ package pm.c7.scout.mixin;
 
 import org.objectweb.asm.tree.*;
 
-import net.fabricmc.loader.api.FabricLoader;
 import pm.c7.scout.mixinsupport.ClassNodeTransformer;
-
-import static org.objectweb.asm.Opcodes.*;
 
 public class PlayerScreenHandlerTransformer implements ClassNodeTransformer {
 	@Override
 	public void transform(String name, ClassNode node) {
-		var resolver = FabricLoader.getInstance().getMappingResolver();
+		/*var resolver = FabricLoader.getInstance().getMappingResolver();
 		var namespace = "intermediary";
 
 		var LPlayerScreenHandler = L(slash(name));
@@ -91,5 +88,7 @@ public class PlayerScreenHandlerTransformer implements ClassNodeTransformer {
 	}
 	private static JumpInsnNode GOTO(LabelNode v) {
 		return new JumpInsnNode(GOTO, v);
+	}
+		 */
 	}
 }

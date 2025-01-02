@@ -1,10 +1,10 @@
 package pm.c7.scout;
 
-import net.minecraft.util.collection.DefaultedList;
-import pm.c7.scout.screen.BagSlot;
+import net.minecraft.core.NonNullList;
+import pm.c7.scout.content.menus.BagSlot;
 
 public interface ScoutScreenHandler {
-	DefaultedList<BagSlot> scout$getSatchelSlots();
-	DefaultedList<BagSlot> scout$getLeftPouchSlots();
-	DefaultedList<BagSlot> scout$getRightPouchSlots();
+	NonNullList<BagSlot> scout$getSatchelSlots();
+	NonNullList<BagSlot> scout$getLeftPouchSlots();
+	NonNullList<BagSlot> scout$getRightPouchSlots();
 }

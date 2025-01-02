@@ -1,42 +1,50 @@
 package pm.c7.scout.mixin;
 
+import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.GameRules;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pm.c7.scout.ScoutNetworking;
 import pm.c7.scout.ScoutScreenHandler;
 import pm.c7.scout.ScoutUtil;
-import pm.c7.scout.item.BaseBagItem;
-import pm.c7.scout.item.BaseBagItem.BagType;
-import pm.c7.scout.screen.BagSlot;
+import pm.c7.scout.content.items.BaseBagItem;
+import pm.c7.scout.content.items.BaseBagItem.BagType;
+import pm.c7.scout.content.menus.BagSlot;
+import pm.c7.scout.networking.EnableSlotsPayload;
 
-@Mixin(ServerPlayerEntity.class)
-public class ServerPlayerEntityMixin {
-	@Inject(method = "onDeath", at = @At("HEAD"))
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerMixin extends Player {
+	// Never called
+	private ServerPlayerMixin() {
+		super(null, null, 0, null);
+	}
+
+	@Inject(method = "die", at = @At("HEAD"))
 	private void scout$attemptFixGraveMods(DamageSource source, CallbackInfo callbackInfo) {
-		ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-		ScoutScreenHandler handler = (ScoutScreenHandler) player.playerScreenHandler;
+		ServerPlayer player = (ServerPlayer) (Object) this;
+		ScoutScreenHandler handler = (ScoutScreenHandler) player.inventoryMenu;
 
-		if (!player.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
+		if (!player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			ItemStack backStack = ScoutUtil.findBagItem(player, BagType.SATCHEL, false);
 			if (!backStack.isEmpty()) {
 				BaseBagItem bagItem = (BaseBagItem) backStack.getItem();
 				int slots = bagItem.getSlotCount();
 
-				DefaultedList<BagSlot> bagSlots = handler.scout$getSatchelSlots();
+				NonNullList<BagSlot> bagSlots = handler.scout$getSatchelSlots();
 
 				for (int i = 0; i < slots; i++) {
 					BagSlot slot = bagSlots.get(i);
-					slot.setInventory(null);
+					slot.setItemHandler(null);
 					slot.setEnabled(false);
 				}
 			}
@@ -46,11 +54,11 @@ public class ServerPlayerEntityMixin {
 				BaseBagItem bagItem = (BaseBagItem) leftPouchStack.getItem();
 				int slots = bagItem.getSlotCount();
 
-				DefaultedList<BagSlot> bagSlots = handler.scout$getLeftPouchSlots();
+				NonNullList<BagSlot> bagSlots = handler.scout$getLeftPouchSlots();
 
 				for (int i = 0; i < slots; i++) {
 					BagSlot slot = bagSlots.get(i);
-					slot.setInventory(null);
+					slot.setItemHandler(null);
 					slot.setEnabled(false);
 				}
 			}
@@ -60,17 +68,16 @@ public class ServerPlayerEntityMixin {
 				BaseBagItem bagItem = (BaseBagItem) rightPouchStack.getItem();
 				int slots = bagItem.getSlotCount();
 
-				DefaultedList<BagSlot> bagSlots = handler.scout$getRightPouchSlots();
+				NonNullList<BagSlot> bagSlots = handler.scout$getRightPouchSlots();
 
 				for (int i = 0; i < slots; i++) {
 					BagSlot slot = bagSlots.get(i);
-					slot.setInventory(null);
+					slot.setItemHandler(null);
 					slot.setEnabled(false);
 				}
 			}
 
-			PacketByteBuf packet = new PacketByteBuf(Unpooled.buffer());
-			ServerPlayNetworking.send(player, ScoutNetworking.ENABLE_SLOTS, packet);
+			PacketDistributor.sendToPlayer(player, EnableSlotsPayload.INSTANCE);
 		}
 	}
 }

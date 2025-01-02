@@ -17,8 +17,6 @@ import com.google.common.collect.Sets;
 
 import joptsimple.internal.Strings;
 
-import net.fabricmc.loader.api.FabricLoader;
-
 import pm.c7.scout.ScoutUtil;
 
 // most of this is taken from EMI
@@ -40,6 +38,7 @@ public class ScoutConfig {
 	// }}}
 
 	// {{{ methods
+	/*
 	public static void loadConfig() {
 		try {
 			File config = getConfigFile();
@@ -62,6 +61,7 @@ public class ScoutConfig {
 			e.printStackTrace();
 		}
 	}
+	 */
 
 	public static void loadConfig(QDCSS css) {
 		try {
@@ -85,7 +85,7 @@ public class ScoutConfig {
 			e.printStackTrace();
 		}
 	}
-
+/*
 	public static void writeConfig() {
 		try {
 			FileWriter writer = new FileWriter(getConfigFile());
@@ -95,7 +95,7 @@ public class ScoutConfig {
 			ScoutUtil.LOGGER.error("[Scout] Error writing config");
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 	public static String getSavedConfig() {
 		Map<String, List<String>> unparsed = Maps.newLinkedHashMap();
@@ -151,9 +151,11 @@ public class ScoutConfig {
 		return ret;
 	}
 
+	/*
 	private static File getConfigFile() {
 		return new File(FabricLoader.getInstance().getConfigDir().toFile(), "scout.css");
 	}
+	 */
 
 	private static void assignField(QDCSS css, String annot, Field field) throws IllegalAccessException {
 		Class<?> type = field.getType();

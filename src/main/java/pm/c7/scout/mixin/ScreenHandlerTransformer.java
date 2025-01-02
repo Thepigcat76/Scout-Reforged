@@ -2,7 +2,6 @@ package pm.c7.scout.mixin;
 
 import org.objectweb.asm.tree.*;
 
-import net.fabricmc.loader.api.FabricLoader;
 import pm.c7.scout.mixinsupport.ClassNodeTransformer;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -12,7 +11,7 @@ public class ScreenHandlerTransformer implements ClassNodeTransformer {
 
 	@Override
 	public void transform(String name, ClassNode node) {
-		var resolver = FabricLoader.getInstance().getMappingResolver();
+		/*var resolver = FabricLoader.getInstance().getMappingResolver();
 		var namespace = "intermediary";
 
 		var internalOnSlotClick = resolver.mapMethodName(namespace, name, "method_30010", "(IILnet/minecraft/class_1713;Lnet/minecraft/class_1657;)V");
@@ -143,6 +142,8 @@ public class ScreenHandlerTransformer implements ClassNodeTransformer {
 				}
 			}
 		}
+
+		 */
 	}
 
 	// debug, keeping here for future use

@@ -1,5 +1,5 @@
 {
   "replace": false,
-  "amount": 2,
+  "size": 2,
   "icon": "scout:gui/pouch_slot"
 }

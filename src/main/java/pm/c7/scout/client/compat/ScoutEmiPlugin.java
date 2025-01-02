@@ -1,20 +1,6 @@
 package pm.c7.scout.client.compat;
 
-import dev.emi.emi.api.EmiPlugin;
-import dev.emi.emi.api.EmiRegistry;
-import dev.emi.emi.api.widget.Bounds;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import pm.c7.scout.ScoutUtil;
-import pm.c7.scout.client.ScoutUtilClient;
-import pm.c7.scout.item.BaseBagItem;
-import pm.c7.scout.item.BaseBagItem.BagType;
-import pm.c7.scout.mixin.client.HandledScreenAccessor;
-
-public class ScoutEmiPlugin implements EmiPlugin {
+public class ScoutEmiPlugin {} /*implements EmiPlugin {
 	@Override
 	public void register(EmiRegistry registry) {
 		registry.addGenericExclusionArea((screen, consumer) -> {
@@ -23,10 +9,10 @@ public class ScoutEmiPlugin implements EmiPlugin {
 
 			MinecraftClient client = MinecraftClient.getInstance();
 
-			var handledScreenAccessor = (HandledScreenAccessor<?>) handledScreen;
+			var handledScreenAccessor = (AbstractContainerScreenAccessor<?>) handledScreen;
 			ScreenHandler handler = handledScreenAccessor.getHandler();
-			var sx = handledScreenAccessor.getX();
-			var sy = handledScreenAccessor.getY();
+			var sx = handledScreenAccessor.getLeftPos();
+			var sy = handledScreenAccessor.getTopPos();
 			var sw = handledScreenAccessor.getBackgroundWidth();
 			var sh = handledScreenAccessor.getBackgroundHeight();
 
@@ -97,4 +83,4 @@ public class ScoutEmiPlugin implements EmiPlugin {
 		});
 	}
 
-}
+}*/

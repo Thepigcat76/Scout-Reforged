@@ -2,15 +2,17 @@ package pm.c7.scout.mixin.client;
 
 import org.objectweb.asm.tree.*;
 
-import net.fabricmc.loader.api.FabricLoader;
 import pm.c7.scout.mixinsupport.ClassNodeTransformer;
-
-import static org.objectweb.asm.Opcodes.*;
 
 public class HandledScreenTransformer implements ClassNodeTransformer {
 	@Override
 	public void transform(String name, ClassNode node) {
-		var resolver = FabricLoader.getInstance().getMappingResolver();
+
+	}
+} /* {
+	@Override
+	public void transform(String name, ClassNode node) {
+		var resolver = ModLoader.getInstance().getMappingResolver();
 		var namespace = "intermediary";
 
 		var drawSlot = resolver.mapMethodName(namespace, name, "method_2385", "(Lnet/minecraft/class_332;Lnet/minecraft/class_1735;)V");
@@ -29,16 +31,16 @@ public class HandledScreenTransformer implements ClassNodeTransformer {
 									int SAFE_REGISTER = 20;
 									mn.instructions.insert(vin, insns(
 										ALOAD(2),
-										INSTANCEOF("pm/c7/scout/screen/BagSlot"),
+										INSTANCEOF("pm/c7/scout/menus/BagSlot"),
 										IFEQ(LnotBag),
 										ALOAD(2),
-										CHECKCAST("pm/c7/scout/screen/BagSlot"),
+										CHECKCAST("pm/c7/scout/menus/BagSlot"),
 										ASTORE(SAFE_REGISTER),
 										ALOAD(SAFE_REGISTER),
-										INVOKEVIRTUAL("pm/c7/scout/screen/BagSlot", "getX", "()I"),
+										INVOKEVIRTUAL("pm/c7/scout/menus/BagSlot", "getX", "()I"),
 										ISTORE(vin.var - 1),
 										ALOAD(SAFE_REGISTER),
-										INVOKEVIRTUAL("pm/c7/scout/screen/BagSlot", "getY", "()I"),
+										INVOKEVIRTUAL("pm/c7/scout/menus/BagSlot", "getY", "()I"),
 										ISTORE(vin.var),
 										LnotBag
 									));
@@ -82,3 +84,4 @@ public class HandledScreenTransformer implements ClassNodeTransformer {
 		return new VarInsnNode(ISTORE, v);
 	}
 }
+*/

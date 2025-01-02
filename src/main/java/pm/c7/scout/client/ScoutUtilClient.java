@@ -1,17 +1,16 @@
 package pm.c7.scout.client;
 
-import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 
 public class ScoutUtilClient {
-	public static @Nullable PlayerScreenHandler getPlayerScreenHandler() {
-		var client = MinecraftClient.getInstance();
-		if (client != null && client.player != null) {
-			return client.player.playerScreenHandler;
+	public static InventoryMenu getPlayerScreenHandler() {
+		Minecraft client = Minecraft.getInstance();
+		if (client.player != null) {
+			return client.player.inventoryMenu;
 		}
 
 		return null;
@@ -19,6 +18,6 @@ public class ScoutUtilClient {
 
 	// FIXME: registry system for mods to register their own blacklisted screens
 	public static boolean isScreenBlacklisted(Screen screen) {
-		return screen instanceof CreativeInventoryScreen;
+		return screen instanceof CreativeModeInventoryScreen;
 	}
 }

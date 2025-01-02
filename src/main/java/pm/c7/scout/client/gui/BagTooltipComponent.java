@@ -1,18 +1,18 @@
 package pm.c7.scout.client.gui;
 
 import com.google.common.math.IntMath;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
 import pm.c7.scout.ScoutUtil;
-import pm.c7.scout.item.BagTooltipData;
+import pm.c7.scout.content.items.BagTooltipData;
 
 import java.math.RoundingMode;
 
-public class BagTooltipComponent implements TooltipComponent {
-	private final DefaultedList<ItemStack> inventory;
+public class BagTooltipComponent implements ClientTooltipComponent {
+	private final NonNullList<ItemStack> inventory;
 	private final int slotCount;
 
 	public BagTooltipComponent(BagTooltipData data) {
@@ -26,16 +26,16 @@ public class BagTooltipComponent implements TooltipComponent {
 	}
 
 	@Override
-	public int getWidth(TextRenderer textRenderer) {
+	public int getWidth(Font font) {
 		return 18 * (Math.min(slotCount, 6));
 	}
 
 	@Override
-	public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext graphics) {
+	public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
 		int originalX = x;
 
 		for (int i = 0; i < slotCount; i++) {
-			this.drawSlot(x, y, i, graphics, textRenderer);
+			this.drawSlot(x, y, i, guiGraphics, font);
 
 			x += 18;
 			if ((i + 1) % 6 == 0) {
@@ -45,10 +45,10 @@ public class BagTooltipComponent implements TooltipComponent {
 		}
 	}
 
-	private void drawSlot(int x, int y, int index, DrawContext graphics, TextRenderer textRenderer) {
+	private void drawSlot(int x, int y, int index, GuiGraphics graphics, Font font) {
 		ItemStack itemStack = this.inventory.get(index);
-		graphics.drawTexture(ScoutUtil.SLOT_TEXTURE, x, y, 0, 46, 7, 18, 18, 256, 256);
-		graphics.drawItem(itemStack, x + 1, y + 1, index);
-		graphics.drawItemInSlot(textRenderer, itemStack, x + 1, y + 1);
+		graphics.blit(ScoutUtil.SLOT_TEXTURE, x, y, 0, 46, 7, 18, 18, 256, 256);
+		graphics.renderItem(itemStack, x + 1, y + 1, index);
+		graphics.renderItemDecorations(font, itemStack, x + 1, y + 1);
 	}
 }

@@ -1,6 +1,5 @@
 package pm.c7.scout;
 
-import com.unascribed.lib39.core.api.AutoMixin;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
